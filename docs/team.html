@@ -1,25 +1,451 @@
 <!DOCTYPE html>
-<html lang="zh"><head>
+<html lang="zh">
+<head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
-<meta http-equiv="refresh" content="60">
-<title>爆款雷达 · 还在加载</title>
+<title>工作台</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
-  body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;
-       background:#0a0d13;color:#e8e8ea;text-align:center;padding:24px;
-       font-family:"PingFang SC","Microsoft YaHei",system-ui,sans-serif}
-  .spin{width:34px;height:34px;margin:0 auto 26px;border:3px solid #2a2f3a;
-        border-top-color:#ff785a;border-radius:50%;animation:s 1s linear infinite}
-  @keyframes s{to{transform:rotate(360deg)}}
-  h1{font-size:23px;margin:0 0 14px;font-weight:600}
-  p{margin:8px 0;color:#9a9aa2;font-size:15px;line-height:1.75}
-  .hint{margin-top:30px;font-size:13.5px;color:#6e6e78}
-  @media(prefers-reduced-motion:reduce){.spin{animation:none}}
-</style></head><body><div>
-  <div class="spin"></div>
-  <h1>你的页面还在加载中,请稍等</h1>
-  <p>第一次大约需要 20-60 分钟。</p>
-  <p>这一页会自己刷新,你可以先去忙别的。</p>
-  <p class="hint">等很久都没变?回到安装 SOP 第 7 步,<br>到仓库的 Actions 看 Sync Content 有没有跑完。</p>
-</div></body></html>
+  :root {
+    --bg:#0a0d13; --card:#11151d; --card-hi:#151a24; --border:#1d2430; --border-hi:#2c3546;
+    --text:#e8ecf3; --muted:#8a94a6; --faint:#5b6577; --accent:#5ea1ff; --green:#3fd68f;
+    --orange:#f0a33f; --pink:#ff6b9d; --red:#ff5c5c; --fire1:#ff8a3d; --fire2:#ff4d6d;
+    --font:'Inter',-apple-system,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;
+    --disp:'Space Grotesk','Inter','PingFang SC','Microsoft YaHei',sans-serif;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { background:var(--bg); color:var(--text); font-family:var(--font); -webkit-font-smoothing:antialiased; }
+  ::selection { background:rgba(94,161,255,.3); }
+  ::-webkit-scrollbar { width:10px; } ::-webkit-scrollbar-thumb { background:#232c3b; border-radius:8px; }
+  :focus-visible { outline:2px solid var(--accent); outline-offset:2px; border-radius:6px; }
+  .ic { width:14px; height:14px; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; fill:none; flex:none; }
+
+  header { position:sticky; top:0; z-index:50; background:rgba(10,13,19,.86);
+    backdrop-filter:blur(14px); border-bottom:1px solid var(--border); padding:13px 20px; }
+  .hrow { display:flex; flex-wrap:wrap; gap:10px; align-items:center; max-width:1200px; margin:0 auto; }
+  .brand { display:flex; align-items:center; gap:10px; margin-right:auto; }
+  .mark { width:31px; height:31px; border-radius:9px; display:grid; place-items:center;
+    background:linear-gradient(135deg,var(--fire1),var(--fire2)); box-shadow:0 4px 16px rgba(255,92,80,.35); }
+  .mark .ic { width:17px; height:17px; color:#fff; }
+  h1 { font-family:var(--disp); font-size:16.5px; font-weight:700; line-height:1.15; }
+  h1 small { display:block; color:var(--faint); font-family:var(--font); font-weight:400; font-size:10.5px; }
+  .me { display:flex; align-items:center; gap:8px; font-size:13px; color:var(--muted); cursor:pointer;
+    background:var(--card); border:1px solid var(--border); border-radius:10px; padding:7px 12px;
+    transition:border-color .18s; }
+  .me:hover { border-color:var(--border-hi); }
+  .me b { color:var(--text); }
+
+  nav { display:flex; gap:7px; max-width:1200px; margin:12px auto 0; flex-wrap:wrap; }
+  .ntab { display:inline-flex; align-items:center; gap:7px; background:var(--card);
+    border:1px solid var(--border); border-radius:999px; padding:7px 16px; font-size:13.5px;
+    color:var(--muted); cursor:pointer; user-select:none; transition:all .18s; }
+  .ntab:hover { border-color:var(--border-hi); color:var(--text); }
+  .ntab.on { color:var(--text); background:linear-gradient(135deg,rgba(255,138,61,.15),rgba(255,77,109,.15));
+    border-color:rgba(255,120,90,.45); }
+
+  main { max-width:1200px; margin:22px auto; padding:0 20px; }
+  .page { display:none; } .page.on { display:block; }
+
+  .stats { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:18px; }
+  .stat { flex:1; min-width:130px; background:var(--card); border:1px solid var(--border);
+    border-radius:14px; padding:14px 16px; }
+  .stat .v { font-family:var(--disp); font-size:26px; font-weight:700; font-variant-numeric:tabular-nums; }
+  .stat .l { color:var(--faint); font-size:12px; margin-top:2px; }
+  .stat.sh .v { color:var(--orange); } .stat.dn .v { color:var(--green); } .stat.pd .v { color:var(--accent); }
+
+  section { background:var(--card); border:1px solid var(--border); border-radius:16px;
+    padding:16px 18px; margin-bottom:16px; }
+  section h2 { font-size:14px; font-weight:600; display:flex; align-items:center; gap:8px; margin-bottom:12px; }
+  section h2 .ic { color:var(--orange); }
+  section h2 small { color:var(--faint); font-weight:400; font-size:11.5px; margin-left:auto; }
+  .row { display:flex; align-items:center; gap:10px; padding:10px 0; border-top:1px solid var(--border);
+    font-size:13px; flex-wrap:wrap; }
+  .row .hookline { flex:1; min-width:200px; color:var(--text); overflow:hidden; text-overflow:ellipsis;
+    white-space:nowrap; }
+  .row .hookline small { color:var(--faint); display:block; font-size:11px; margin-top:1px; }
+  .row .who2 { color:var(--accent); text-decoration:none; font-weight:600; font-size:12px; white-space:nowrap; }
+  .xb { font-family:var(--disp); font-weight:600; font-size:11px; color:var(--orange);
+    border:1px solid rgba(240,163,63,.4); background:rgba(240,163,63,.07); border-radius:99px;
+    padding:2px 8px; white-space:nowrap; }
+  .pill { display:inline-flex; align-items:center; gap:4px; background:#0c0f16; color:var(--muted);
+    border:1px solid var(--border); border-radius:9px; padding:5.5px 10px; font-size:11.5px;
+    cursor:pointer; text-decoration:none; font-family:var(--font); transition:all .18s; white-space:nowrap; }
+  .pill .ic { width:11px; height:11px; }
+  .pill:hover { color:var(--accent); border-color:rgba(94,161,255,.5); }
+  .pill.ok:hover { color:var(--green); border-color:rgba(63,214,143,.5); }
+  .pill.bad:hover { color:var(--red); border-color:rgba(255,92,92,.5); }
+  .none { color:var(--faint); font-size:13px; padding:14px 0 6px; }
+
+  .act { display:flex; gap:9px; padding:7px 0; border-top:1px solid var(--border);
+    font-size:12.5px; color:var(--muted); }
+  .act time { color:var(--faint); font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .act b { color:var(--text); font-weight:600; }
+  .act .to { color:var(--orange); }
+
+  #radarWrap { height:calc(100vh - 150px); min-height:500px; border:1px solid var(--border);
+    border-radius:16px; overflow:hidden; }
+  #radarWrap iframe { width:100%; height:100%; border:0; }
+
+  .sop { max-width:820px; }
+  .sop h3 { font-size:15px; margin:22px 0 10px; display:flex; gap:8px; align-items:center; }
+  .sop h3 .ic { color:var(--orange); }
+  .sop ol { margin:0 0 8px 22px; color:var(--muted); font-size:13.5px; line-height:1.9; }
+  .sop ol b { color:var(--text); }
+  .sop p { color:var(--muted); font-size:13px; line-height:1.7; margin-bottom:6px; }
+  .sop table { border-collapse:collapse; font-size:13px; margin:8px 0; }
+  .sop td, .sop th { border:1px solid var(--border); padding:7px 14px; color:var(--muted); }
+  .sop th { color:var(--text); background:var(--card-hi); }
+
+  #mission { border:1px solid rgba(255,120,90,.35); border-radius:16px; padding:15px 18px;
+    margin-bottom:14px; background:linear-gradient(135deg,rgba(255,138,61,.10),rgba(255,77,109,.10)); }
+  #mission .mt { font-weight:600; font-size:14px; display:flex; gap:8px; align-items:center; }
+  #mission .mt .ic { color:var(--orange); }
+  #mission .md { color:var(--muted); font-size:12.5px; margin-top:5px; line-height:1.6; }
+  #mission .md b { color:var(--text); font-family:var(--disp); }
+  #overlay { position:fixed; inset:0; background:rgba(6,8,12,.88); backdrop-filter:blur(6px);
+    z-index:200; display:none; place-items:center; }
+  #overlay.show { display:grid; }
+  .obox { background:var(--card); border:1px solid var(--border-hi); border-radius:18px;
+    padding:28px 30px; width:min(92vw,380px); }
+  .obox h2 { font-family:var(--disp); font-size:18px; margin-bottom:6px; }
+  .obox p { color:var(--muted); font-size:13px; margin-bottom:16px; }
+  .obox input, .obox select { width:100%; background:#0c0f16; color:var(--text);
+    border:1px solid var(--border); border-radius:10px; padding:10px 13px; font-size:14px;
+    font-family:var(--font); margin-bottom:11px; }
+  .obox input:focus, .obox select:focus { border-color:var(--accent); outline:none; }
+  .obox button { width:100%; background:linear-gradient(135deg,var(--fire1),var(--fire2));
+    color:#fff; border:0; border-radius:10px; padding:11px; font-size:14px; font-weight:600;
+    font-family:var(--font); cursor:pointer; }
+  .obox button:active { transform:scale(.98); }
+
+  #toast { position:fixed; bottom:26px; left:50%; transform:translateX(-50%) translateY(8px);
+    background:var(--card-hi); border:1px solid var(--border-hi); border-radius:11px;
+    padding:11px 20px; font-size:13px; display:none; z-index:300; opacity:0;
+    box-shadow:0 12px 32px rgba(0,0,0,.5); transition:opacity .2s, transform .2s; }
+  #toast.show { display:block; opacity:1; transform:translateX(-50%) translateY(0); }
+  @media (prefers-reduced-motion: reduce) { * { animation:none!important; transition:none!important; } }
+</style>
+</head>
+<body>
+<svg style="display:none" xmlns="http://www.w3.org/2000/svg">
+  <symbol id="i-flame" viewBox="0 0 24 24"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></symbol>
+  <symbol id="i-user" viewBox="0 0 24 24"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></symbol>
+  <symbol id="i-ext" viewBox="0 0 24 24"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></symbol>
+  <symbol id="i-video" viewBox="0 0 24 24"><path d="m10 8 6 4-6 4Z"/><rect x="2" y="4" width="20" height="16" rx="3"/></symbol>
+  <symbol id="i-book" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></symbol>
+  <symbol id="i-radar" viewBox="0 0 24 24"><path d="M19.07 4.93A10 10 0 0 0 6.99 3.34"/><path d="M4 6h.01"/><path d="M2.29 9.62A10 10 0 1 0 21.31 8.35"/><path d="M16.24 7.76A6 6 0 1 0 8.23 16.67"/><path d="M12 18h.01"/><path d="M17.99 11.66A6 6 0 0 1 15.77 16.67"/><circle cx="12" cy="12" r="2"/><path d="m13.41 10.59 5.66-5.66"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></symbol>
+</svg>
+<header>
+  <div class="hrow">
+    <div class="brand">
+      <div class="mark"><svg class="ic"><use href="#i-flame"/></svg></div>
+      <h1>工作台<small id="updated"></small></h1>
+    </div>
+    <div class="me" id="meBtn" title="点击修改身份">
+      <svg class="ic"><use href="#i-user"/></svg><span id="meLabel">未登记</span>
+    </div>
+  </div>
+  <nav>
+    <div class="ntab on" data-p="work"><svg class="ic"><use href="#i-clock"/></svg>今日工作</div>
+    <div class="ntab" data-p="radar"><svg class="ic"><use href="#i-radar"/></svg>爆款雷达</div>
+    <div class="ntab" data-p="sop"><svg class="ic"><use href="#i-book"/></svg>SOP</div>
+  </nav>
+</header>
+<main>
+  <div class="page on" id="p-work">
+    <div id="mission"></div>
+    <div class="stats">
+      <div class="stat pd"><div class="v" id="stPending">–</div><div class="l">未处理(待挑选)</div></div>
+      <div class="stat sh"><div class="v" id="stShoot">–</div><div class="l">拍摄中</div></div>
+      <div class="stat dn"><div class="v" id="stDone">–</div><div class="l">已处理</div></div>
+    </div>
+    <section id="secShoot">
+      <h2><svg class="ic"><use href="#i-video"/></svg>拍摄中队列<small>做完一条,点「完成」</small></h2>
+      <div id="shootList"></div>
+    </section>
+    <section id="secPick">
+      <h2><svg class="ic"><use href="#i-flame"/></svg>本周待挑选爆款 Top 8<small>看中就点「选中拍摄」,细看去爆款雷达</small></h2>
+      <div id="pickList"></div>
+    </section>
+  </div>
+  <div class="page" id="p-radar"><div id="radarWrap"></div></div>
+  <div class="page sop" id="p-sop">
+    <section>
+      <h3><svg class="ic"><use href="#i-flame"/></svg>SOP-01 · Marketer 每周选题流程(周一,约30分钟)</h3>
+      <ol>
+        <li>打开<b>爆款雷达</b>,点快筛「<b>真爆款 ×2+</b>」+「<b>近7天</b>」</li>
+        <li>看「爆款热词」确认本周主题方向(热词越多的主题越优先)</li>
+        <li>挑 <b>3–5 条</b>适合改编的。标准:话题跟我们相关 / Hook 可复制 / 我们拍得出来</li>
+        <li>每条点「<b>Brief</b>」复制 → 发到拍摄群</li>
+        <li>把选中的卡片<b>拖到「拍摄中」</b></li>
+        <li>明显不适合的拖「跳过」,保持未处理越少越好</li>
+      </ol>
+    </section>
+    <section>
+      <h3><svg class="ic"><use href="#i-video"/></svg>SOP-02 · Content Creator 拍摄改编流程(每条 ≤1天)</h3>
+      <ol>
+        <li>打开工作台「<b>今日工作</b>」,看拍摄中队列,从最旧的开始</li>
+        <li>打开原帖看 <b>3 遍</b>:第1遍看整体 / 第2遍拆 Hook(前3秒为什么让人停下) / 第3遍记结构(几个镜头、什么节奏)</li>
+        <li><b>改编不照抄</b>:换成我们的案例、口吻、行业。保留结构,替换内容</li>
+        <li>拍摄 → 剪辑。<b>前3秒必须有钩子</b>,字幕开头即出</li>
+        <li>发布后回到工作台,该条点「<b>完成</b>」</li>
+      </ol>
+    </section>
+    <section>
+      <h3><svg class="ic"><use href="#i-book"/></svg>SOP-03 · 状态定义(团队统一语言)</h3>
+      <table>
+        <tr><th>状态</th><th>意思</th><th>谁负责改</th></tr>
+        <tr><td>未处理</td><td>还没人筛选过</td><td>Marketer 每周清理</td></tr>
+        <tr><td>拍摄中</td><td>已选中,正在改编/拍摄/剪辑</td><td>Marketer 选中时拖入</td></tr>
+        <tr><td>已处理</td><td>已发布或已完成改编</td><td>Creator 完成时点</td></tr>
+        <tr><td>跳过</td><td>不适合我们,不再考虑</td><td>任何人</td></tr>
+      </table>
+    </section>
+    <section>
+      <h3><svg class="ic"><use href="#i-radar"/></svg>SOP-04 · 看到「引流」标签的帖子怎么学</h3>
+      <p>带「引流」标的帖子,重点<b>不是内容,是漏斗</b>。记录三件事:</p>
+      <ol>
+        <li>留言<b>关键词</b>是什么?(例:留言「Start」)</li>
+        <li>送的<b>诱饵</b>是什么?(模板 / 课程 / 清单)</li>
+        <li>之后导去<b>哪里</b>?(DM 自动回复 → 链接 → 报名页)</li>
+      </ol>
+      <p>好的打法直接抄结构,用我们的 GHL / ManyChat 实现。</p>
+    </section>
+    <section>
+      <h3><svg class="ic"><use href="#i-user"/></svg>SOP-05 · 竞对名单管理(发现好账号就加进来)</h3>
+      <ol>
+        <li>打开 Supabase「<b>competitors</b>」表,加一行</li>
+        <li><b>Username</b>:贴账号名或 IG <b>主页</b>链接都行(带 ?igsh= 参数没关系;不要贴帖子链接)</li>
+        <li><b>Tracker</b>:选 IG Competitors 或 AI Competitors</li>
+        <li><b>Active</b>:打勾✅ — <b>没勾不会抓</b></li>
+        <li>每周一自动生效;停止追踪 = 取消勾,不用删行</li>
+      </ol>
+      <p>加账号的标准:跟我们领域相关 / 内容有爆款相 / 值得学。发现雷达里某账号长期没爆款,把它 Active 取消,腾出额度换新的。</p>
+    </section>
+    <section>
+      <h3><svg class="ic"><use href="#i-user"/></svg>SOP-06 · 第一次设置 & 常见问题</h3>
+      <ol>
+        <li><b>登记身份:</b>第一次打开工作台会弹「你是谁」→ 输名字、选角色。这决定你看到的任务卡和排版</li>
+        <li><b>直接改状态:</b>雷达里把卡片拖到上方分类,或用卡片下拉选。看到绿色 ✓ 就成了。<b>不需要输任何密钥</b> —— 这套系统天生只允许改状态,改不了别的数据,所以安全无需登录</li>
+      </ol>
+      <p><b>常见问题:</b></p>
+      <table>
+        <tr><th>现象</th><th>原因</th><th>解决</th></tr>
+        <tr><td>改了状态没反应 / 报错</td><td>网络断了,或页面是旧版</td><td>刷新页面(Ctrl+Shift+R)再试</td></tr>
+        <tr><td>队友改的状态我看不到</td><td>页面最多 10 分钟同步一次</td><td>刷新页面即可;自己的改动是即时的</td></tr>
+        <tr><td>网页打不开 / 数据是空的</td><td>每周自动更新那天可能还在跑</td><td>等 1 小时后再开;还不行找老板看 GitHub Actions</td></tr>
+      </table>
+      <p>状态存在云端(Supabase),换电脑、关机都不会丢,全团队实时共享。</p>
+    </section>
+  </div>
+</main>
+<div id="overlay"><div class="obox">
+  <h2>👋 你是谁?</h2>
+  <p>登记一次,方便团队知道是谁在操作。</p>
+  <input id="oName" placeholder="你的名字" maxlength="20">
+  <select id="oRole">
+    <option value="Marketer">Marketer(选题/投放)</option>
+    <option value="Content Creator">Content Creator(拍摄/剪辑)</option>
+    <option value="Boss">Boss</option>
+  </select>
+  <button id="oSave">进入工作台</button>
+</div></div>
+<div id="toast"></div>
+<script id="data" type="application/json">[{"id": "DfbsIr6D7ta", "tracker": "Direct selling ceo coffee 竞对", "competitor": "coach_haslina.nasir", "caption": "ELITE team november . let’s go let’s grow 🔥\n\ndouble the work double the activity \n\n“Membina komuniti 10,000 rakan kolaborasi aktif untuk menyebarkan kesedaran hidup sihat dan peluang menjana pendapatan.”", "transcript": "", "brk": "Hook类型: 身份共鸣\n结构: 团队高光展示 → 阶段目标宣布 → 使命愿景号召\n为什么火: 强烈的团队凝聚力与事业宏图激发了同频者的向往与加入冲动。\n改编角度: 晒出你的团队月度目标与最新战绩，吸引志同道合者加入。", "my": "每天想换一个品牌喝咖啡的人，其实不用想得太复杂。\n\n很多人以为，想在马来西亚和新加坡找一个好喝的咖啡，一定要到处去咖啡馆排队。\n其实不是这样的，真正重要的是选对一个健康的品牌。\n\n第一步，了解111咖啡计划。我们做的是双鹤的CEO咖啡，里面带有灵芝成分，不管是自己喝还是分享都很方便。\n第二步，联系我免费注册会员。注册后不需要盲目摸索，直接跟着团队一起了解怎么开始。\n第三步，跟我们一起做。不管你是想找个好喝的日常饮品，还是想在喝咖啡的同时多一份收入，都可以直接来找我。\n\n以前我也觉得，想要换个咖啡品牌或者多一份收入很难，天天都在看别人分享。\n现在看懂了之后，只要找到对的产品和方向，每天喝咖啡的同时也能顺便开启新的计划。\n\n如果你也想在马来西亚或新加坡喝到不一样的咖啡，或者想了解怎么加入，可以直接私信我。\n先联系我，我们出来谈。", "tags": "", "bait": false, "type": "Carousel", "likes": 30, "comments": 2, "er": 0.01, "followers": 505390, "date": "2026-11-07", "url": "https://www.instagram.com/p/DfbsIr6D7ta/", "video": false, "ratio": 0, "score": 0.01, "status": "未处理", "x": 1.0}, {"id": "DfPRSGOzlt4", "tracker": "Direct selling ceo coffee 竞对", "competitor": "coach_haslina.nasir", "caption": "we are the brand ❤️❤️❤️#herbalifemalaysia #presidentsteam #osakaqualifier", "transcript": "Baiklah, kita dapat bag yang sangat cantik Sudah tentu Ini juga sangat bagus Mereka ada nama saya di sini Bag ini seperti... Pus! Mari kita lihat apa yang lain kita ada Ini semua yang kita mempunyai Kerabu Lai, logo Ini juga kerabu Lai Yang bagian kita ini Also ada Kerabu Lai Hello Kita ada t-shirt, botol Ini seperti succun vacuum Dan adaptor juga ada logo kerabu Lai Kordian Kau nampak itu? Yang ini apa? Ini airpod Ini adalah airpod Ini juga sederah Ya, sangat bagus Saya suka ini T-shirt Aria", "brk": "Hook类型: 展示成果\n结构: 亮出专属定制大礼包 → 逐件开箱展示品牌周边 → 表达喜爱与自豪情绪\n为什么火: 通过高品质的品牌专属定制周边展示，激发了粉丝对团队荣誉感与归属感的向往。\n改编角度: 结合自媒体业务，拍摄并展示学员的专属福利或里程碑成就大礼包，增强粉丝粘性。", "my": "每天都要喝咖啡的人，你真的喝对了吗？\n\n很多人以为，随便买个牌子的咖啡喝喝就好，只要能提神就行。\n\n其实不是这样的，你喝的可能只是普通的黑咖啡或者奶精咖啡。\n\n今天带你看看，怎么选择真正适合你的咖啡。\n\n第一步，看看里面的成分。你要选带有灵芝成分的咖啡，不仅好喝，还能照顾身体，每天喝一杯也不会觉得对身体有负担。\n\n第二步，找一个可以长期喝的品牌。在马来西亚和新加坡，很多爱喝咖啡的人都在找品质好的咖啡，选对品牌才能每天都想喝。\n\n第三步，了解怎么注册会员。注册是免费的，你只需要联系我，就能直接注册成为会员，开始了解更多咖啡的资讯。\n\n以前你可能随便在外面买咖啡，花了很多钱，又不知道喝下去的是什么。\n\n现在你可以换成111咖啡计划，喝到带有灵芝的CEO咖啡，既能享受喝咖啡的乐趣，又能喝得健康。\n\n如果你也想换一个品牌喝咖啡，现在就私信我，我们聊聊怎么免费注册成为会员。", "tags": "herbalifemalaysia, presidentsteam, osakaqualifier", "bait": false, "type": "Video", "likes": 37, "comments": 2, "er": 0.01, "followers": 505390, "date": "2026-11-02", "url": "https://www.instagram.com/p/DfPRSGOzlt4/", "video": true, "ratio": 0, "score": 0.01, "status": "未处理", "x": 1.0}, {"id": "De1Im_qTTJT", "tracker": "Direct selling ceo coffee 竞对", "competitor": "coach_haslina.nasir", "caption": "Lagi tak menjerit biarkan .. asalkan bahagia", "transcript": "", "brk": "", "my": "", "tags": "", "bait": false, "type": "Video", "likes": 58, "comments": 0, "er": 0.01, "followers": 505390, "date": "2026-10-23", "url": "https://www.instagram.com/p/De1Im_qTTJT/", "video": true, "ratio": 0, "score": 0.01, "status": "未处理", "x": 1.0}, {"id": "De_nIQjz3Ld", "tracker": "Direct selling ceo coffee 竞对", "competitor": "coach_haslina.nasir", "caption": "Program Kurus Online Bersama CH ni memang santai, sesuai untuk korang yang nak turun berat badan tanpa stress.\n\nDalam program ni, korang akan dapat:\n\n 1. Meal Plan Sihat – Menu seimbang dan mudah ikut, nutrition untuk boost result.\n 2. Workout Simple – Rutin senaman yang senang, boleh buat kat rumah je.\n 3. Coaching 1-on-1 – CH akan guide rapat2, monitor progress, dan bagi tips untuk stay on track.\n 4. Support Group – Korang takkan rasa sorang-sorang sebab ada geng dalam group yang sama-sama nak capai goal.\n5. Apps workout khas utk step by step follow up sistem sangat mudah utk beginner \n\nBestnya, program ni fleksibel, so boleh follow ikut masa dan keselesaan sendiri. Kalau ada apa-apa cabaran , CH sentiasa ada untuk bagi sokongan. Nak join, terus DM CH - CANTIK \n\nLet’s make this happen! 💪\n#herbalifemalaysia #kurus  #teampowerfitmalaysia  #herbalifeKualalumpur #coachherbalifemalaysia tipskurus programkurusmalaysia\n\nLink wasap\nhttps://joinprogramtpfm.wasap.my/", "transcript": "", "brk": "Hook类型: 痛点直击\n结构: 放松减脂 → 5大核心福利 → 灵活时间 → 行动呼吁\n为什么火: 精准击中想减肥又怕压力、没时间去健身房的人群痛点\n改编角度: 针对自媒体同行，可盘点低门槛、轻松起号的5大核心工具包进行复刻", "my": "每天早上想换个口味喝咖啡，却发现市面上的选择不是太甜就是太单调吗？\n\n很多人以为，想在马来西亚和新加坡喝到一杯健康的咖啡，就必须自己花大把时间研究成分，或者只能去那些价格很高的咖啡店去买。\n\n其实不是这样的，真正让你觉得难的，是没有找到对的选择。\n\n今天分享三个很多爱喝咖啡的人都在用的方法。\n\n第一点，换一个带有灵芝的咖啡品牌。每天早上喝的那杯咖啡，不用特地去买很贵的，选双鹤的CEO咖啡就可以了。因为里面有灵芝成分，喝起来顺口，也不会觉得给身体太大负担。\n\n第二点，找一个免费注册会员的管道。你不需要一开始就囤一堆货，直接注册成为会员，就能开始了解整个111咖啡计划。\n\n第三点，跟着团队一起学习。想要喝咖啡顺便多一份收入的话，不用自己一个人摸索，直接找我，我们有提供相关的培训，带你一步一步看懂整个计划。\n\n以前很多人想找一份多出来的收入，往往不知道从哪里开始，常常卡在不知道怎么踏出第一步。\n\n现在，只要用对方法，不仅每天能喝到喜欢的咖啡，还能顺便了解怎么跟我们一起做。\n\n如果你也想换一个品牌喝咖啡，或者想了解怎么一起做这个计划，直接私信我，我们出来谈。", "tags": "herbalifemalaysia, kurus, teampowerfitmalaysia, herbalifeKualalumpur, coachherbalifemalaysia", "bait": false, "type": "Video", "likes": 29, "comments": 0, "er": 0.01, "followers": 505390, "date": "2026-10-27", "url": "https://www.instagram.com/p/De_nIQjz3Ld/", "video": true, "ratio": 0, "score": 0.01, "status": "未处理", "x": 1.0}, {"id": "DeoMACazw9R", "tracker": "Direct selling ceo coffee 竞对", "competitor": "coach_haslina.nasir", "caption": "Anda yang mana satu ?\n\n Semak dan perhatikan", "transcript": "", "brk": "", "my": "", "tags": "", "bait": false, "type": "Video", "likes": 41, "comments": 0, "er": 0.01, "followers": 505390, "date": "2026-10-18", "url": "https://www.instagram.com/p/DeoMACazw9R/", "video": true, "ratio": 0, "score": 0.01, "status": "未处理", "x": 1.0}, {"id": "DfcKGRIP_mY", "tracker": "Direct selling ceo coffee 竞对", "competitor": "coach_haslina.nasir", "caption": "Program Kurus Online Bersama CH ni memang santai, sesuai untuk korang yang nak turun berat badan tanpa stress.\n\nDalam program ni, korang akan dapat:\n\n 1. Meal Plan Sihat – Menu seimbang dan mudah ikut, nutrition untuk boost result.\n 2. Workout Simple – Rutin senaman yang senang, boleh buat kat rumah je.\n 3. Coaching 1-on-1 – CH akan guide rapat2, monitor progress, dan bagi tips untuk stay on track.\n 4. Support Group – Korang takkan rasa sorang-sorang sebab ada geng dalam group yang sama-sama nak capai goal.\n5. Apps workout khas utk step by step follow up sistem sangat mudah utk beginner \n\nBestnya, program ni fleksibel, so boleh follow ikut masa dan keselesaan sendiri. Kalau ada apa-apa cabaran , CH sentiasa ada untuk bagi sokongan. Nak join, terus DM CH - CANTIK \n\nLet’s make this happen! 💪\n#herbalifemalaysia #kurus  #teampowerfitmalaysia  #herbalifeKualalumpur #coachherbalifemalaysia tipskurus programkurusmalaysia\n\nLink wasap\nhttps://joinprogramtpfm.wasap.my/", "transcript": "", "brk": "Hook类型: 痛点直击\n结构: 放松减脂痛点 → 5大核心交付 → 行动呼吁\n为什么火: 精准切入小白想轻松减肥又怕压力大的心理，方案清晰。\n改编角度: 针对自媒体创业者焦虑，推出无压力轻量化变现陪跑营。", "my": "每天想换一个品牌喝咖啡，却总是找不到适合自己的那一款吗？\n\n很多人以为，想喝到好喝又带点不一样的咖啡，就一定要去外面大排长龙的咖啡馆，花很多钱买一杯普通的咖啡。\n\n其实不是这样的，真正重要的是选对适合自己的选择。\n\n第一，你可以先了解111咖啡计划。这是专门给爱喝咖啡、想换一个品牌喝的人准备的。你可以先看看这个双鹤的CEO咖啡，里面带有灵芝，喝起来的感觉很不一样。\n\n第二，你可以选择加入我们。如果你不仅想喝咖啡，还想要多一份收入，想要一起赚钱，这里有提供相关的培训，让你清楚知道怎么开始。\n\n第三，你可以直接联系我。马来西亚和新加坡的朋友如果想要了解更多，可以直接找我，我们可以出来面对面谈，把你想知道的事情都聊清楚。\n\n以前想找一款特别的咖啡或者想多一份收入，总是不知道从哪里开始，也不知道该找谁了解。\n\n换了现在的方法之后，不仅能喝到双鹤的CEO咖啡，还能了解怎么一起做咖啡计划，整个人轻松很多。\n\n如果你也想换一个品牌喝咖啡，或者想了解怎么一起赚钱，现在就可以直接联系我注册成为免费会员。", "tags": "herbalifemalaysia, kurus, teampowerfitmalaysia, herbalifeKualalumpur, coachherbalifemalaysia", "bait": false, "type": "Video", "likes": 68, "comments": 0, "er": 0.01, "followers": 505390, "date": "2026-11-07", "url": "https://www.instagram.com/p/DfcKGRIP_mY/", "video": true, "ratio": 0, "score": 0.01, "status": "未处理", "x": 1.0}, {"id": "DeS12amzPXP", "tracker": "Direct selling ceo coffee 竞对", "competitor": "coach_haslina.nasir", "caption": "Simple way to eat less oil …😍😍😍", "transcript": "You my little poutain So I'll give a hoot what you do say girl I know you a little too tight I'll be shooting that shot like 2k girl I know tell em I'm telling my necks Tell em you follow something fresh I know Tell em I'm telling my necks Tell em you follow something fresh I know Put a little gold in the teeth and the fiqas So I took the doors out the deep okay I see your brother holding your seat", "brk": "Hook类型: 痛点直击\n结构: 痛点引入 → 错误认知纠偏 → 简单减脂技巧\n为什么火: 顺应健康减脂需求，提供低门槛的控油妙招\n改编角度: 结合做自媒体的节奏，分享如何高效控油保持身材", "my": "你每天上班想换一个品牌喝，却不知道选哪一个吗。\n\n很多人以为，想喝到好喝的咖啡，就一定要去外面排队买很贵的，或者自己买一堆复杂的机器回来泡。\n\n其实不用这么麻烦，换一个品牌，喝对一杯就够了。\n\n今天带你看马新两地很多爱喝咖啡的人都在看的 111咖啡计划，里面喝的是双鹤的 CEO 咖啡。\n\n第一步，了解什么是灵芝咖啡。它是把健康带有灵芝的咖啡带进日常生活，不需要你改变原本的习惯，只要每天换一杯来喝。\n\n第二步，找我免费注册会员。注册过程很简单，你只需要联系我，我来帮你想办法处理，不用担心自己不会弄。\n\n第三步，喝完觉得好喝，还可以了解怎么一起做咖啡计划。如果你除了喝咖啡，也想多一份收入，我们可以坐下来慢慢谈。\n\n以前你每天随便买一杯，喝完就算了，也不知道自己在喝什么，钱包还变薄了。\n\n现在你换成喝 111咖啡计划的 CEO 咖啡，不仅能喝到带灵芝的健康咖啡，还能认识想一起赚钱的人。\n\n如果你也想在马新两地找一个新品牌来喝，或者想了解怎么免费注册会员，现在就来私信我，我们出来谈。", "tags": "", "bait": false, "type": "Video", "likes": 32, "comments": 0, "er": 0.01, "followers": 505390, "date": "2026-10-10", "url": "https://www.instagram.com/p/DeS12amzPXP/", "video": true, "ratio": 0, "score": 0.01, "status": "未处理", "x": 1.0}, {"id": "Dfgiwblv--N", "tracker": "Direct selling ceo coffee 竞对", "competitor": "coach_haslina.nasir", "caption": "Program Kurus Online Bersama CH ni memang santai, sesuai untuk korang yang nak turun berat badan tanpa stress.\n\nDalam program ni, korang akan dapat:\n\n 1. Meal Plan Sihat – Menu seimbang dan mudah ikut, nutrition untuk boost result.\n 2. Workout Simple – Rutin senaman yang senang, boleh buat kat rumah je.\n 3. Coaching 1-on-1 – CH akan guide rapat2, monitor progress, dan bagi tips untuk stay on track.\n 4. Support Group – Korang takkan rasa sorang-sorang sebab ada geng dalam group yang sama-sama nak capai goal.\n5. Apps workout khas utk step by step follow up sistem sangat mudah utk beginner \n\nBestnya, program ni fleksibel, so boleh follow ikut masa dan keselesaan sendiri. Kalau ada apa-apa cabaran , CH sentiasa ada untuk bagi sokongan. Nak join, terus DM CH - CANTIK \n\nLet’s make this happen! 💪\n#herbalifemalaysia #kurus  #teampowerfitmalaysia  #herbalifeKualalumpur #coachherbalifemalaysia tipskurus programkurusmalaysia\n\nLink wasap\nhttps://joinprogramtpfm.wasap.my/", "transcript": "", "brk": "Hook类型: 痛点直击\n结构: 放松减脂痛点 → 5大核心交付 → 行动呼吁\n为什么火: 精准切入想无压力减肥又需要陪伴的群体。\n改编角度: 盘点自媒体小白从零起步最需要的5大保姆级支持。", "my": "每天想换一个品牌喝咖啡，却总是找不到适合自己的那一款吗？\n\n很多人以为，想在马来西亚喝到一杯好的咖啡，只能天天去外面咖啡馆花大钱买。\n\n其实不是这样的，真正让你觉得喝咖啡很麻烦的，是因为你还没试过 111咖啡计划。\n\n第一个方法，免费注册成为会员。你不需要一开始就花大笔钱去买一堆货，只要先注册了解，就能开始接触到双鹤的 CEO 咖啡。\n\n第二个方法，直接品尝含有灵芝的健康咖啡。这杯咖啡不只是普通的饮料，它带有灵芝成分，让你可以边喝咖啡边照顾身体。\n\n第三个方法，找我出来谈。不管你是只想单纯喝咖啡的爱好者，还是想要多一份收入的人，我们都可以见面聊聊看怎么开始。\n\n以前在马来西亚和新加坡，想喝好咖啡或者找副业的人，常常不知道该从哪里开始，卡在不知道怎么选择品牌。\n\n现在用对方法以后，你不仅能喝到品质好的 CEO 咖啡，还可以根据自己的需求，选择只喝咖啡或者加入我们一起做。\n\n如果你也想换一个品牌喝咖啡，或者想了解怎么一起做，直接私信联系我注册。", "tags": "herbalifemalaysia, kurus, teampowerfitmalaysia, herbalifeKualalumpur, coachherbalifemalaysia", "bait": false, "type": "Video", "likes": 29, "comments": 0, "er": 0.01, "followers": 505390, "date": "2026-11-09", "url": "https://www.instagram.com/p/Dfgiwblv--N/", "video": true, "ratio": 0, "score": 0.01, "status": "未处理", "x": 1.0}, {"id": "De323-czqpa", "tracker": "Direct selling ceo coffee 竞对", "competitor": "coach_haslina.nasir", "caption": "Program Kurus Online Bersama CH ni memang santai, sesuai untuk korang yang nak turun berat badan tanpa stress.\n\nDalam program ni, korang akan dapat:\n\n 1. Meal Plan Sihat – Menu seimbang dan mudah ikut, nutrition untuk boost result.\n 2. Workout Simple – Rutin senaman yang senang, boleh buat kat rumah je.\n 3. Coaching 1-on-1 – CH akan guide rapat2, monitor progress, dan bagi tips untuk stay on track.\n 4. Support Group – Korang takkan rasa sorang-sorang sebab ada geng dalam group yang sama-sama nak capai goal.\n5. Apps workout khas utk step by step follow up sistem sangat mudah utk beginner \n\nBestnya, program ni fleksibel, so boleh follow ikut masa dan keselesaan sendiri. Kalau ada apa-apa cabaran , CH sentiasa ada untuk bagi sokongan. Nak join, terus DM CH - CANTIK \n\nLet’s make this happen! 💪\n#herbalifemalaysia #kurus  #teampowerfitmalaysia  #herbalifeKualalumpur #coachherbalifemalaysia tipskurus programkurusmalaysia\n\nLink wasap\nhttps://joinprogramtpfm.wasap.my/", "transcript": "", "brk": "Hook类型: 痛点直击\n结构: 轻松减肥痛点 → 5大核心权益 → 行动呼吁\n为什么火: 精准击中想减肥又怕压力的人群，方案清晰直击需求\n改编角度: 结合自媒体变现干货，推出“零压力涨粉/变现5步法”限时招募", "my": "每天都在喝咖啡，为什么你还是觉得越喝越累？\n\n很多人以为，想换一个品牌喝咖啡，或者想找个能边喝咖啡边找副业的机会，一定要花很多钱去买一堆复杂的课程，或者要懂很多生意经。\n\n其实根本不用那么麻烦。\n\n第一，你可以直接了解111咖啡计划，我们喝的是双鹤的CEO咖啡，里面带有灵芝，很适合平时爱喝咖啡的人。\n\n第二，注册会员是完全免费的，你不需要一开始就囤一大堆货，只要联系我帮你注册就行。\n\n第三，我们有提供培训，不管你是马来西亚还是新加坡的朋友，想一起做咖啡计划赚多一份收入，我都会带你一步一步看懂。\n\n以前很多人想找副业，打工下班后不知道可以做什么，卡在不知道怎么开始。\n\n现在换成喝双鹤CEO咖啡，不仅能喝到健康的咖啡，还能跟着我们的111咖啡计划，找到想一起赚钱的人。\n\n如果你也想在马来西亚或新加坡喝咖啡顺便了解怎么赚钱，现在就直接私信我，我们出来谈。", "tags": "herbalifemalaysia, kurus, teampowerfitmalaysia, herbalifeKualalumpur, coachherbalifemalaysia", "bait": false, "type": "Video", "likes": 45, "comments": 0, "er": 0.01, "followers": 505390, "date": "2026-10-24", "url": "https://www.instagram.com/p/De323-czqpa/", "video": true, "ratio": 0, "score": 0.01, "status": "未处理", "x": 1.0}, {"id": "DfCy6FRTuyY", "tracker": "Direct selling ceo coffee 竞对", "competitor": "coach_haslina.nasir", "caption": "Berminat untuk coaching  program + produk herbalife . Boleh hubungi saya 0173256869 atau tekan link  profile info . Saya bantu step by step cara mudah nak kurus cantik sihat \n\n#herbalifemalaysia #herbalifesingapore #coachherbalifemalaysia #produkherbalife #herbalifekualalumpur herbalifekedah herbalifekuantan", "transcript": "A", "brk": "Hook类型: 痛点直击\n结构: 痛点引入 → 解决方案 → 行动召唤\n为什么火: 直接切中目标群体减脂瘦身的核心诉求，转化路径清晰。\n改编角度: 结合自媒体运营变现难的痛点，推出小白起号陪跑方案引导私域。", "my": "每天想换一杯好咖啡来喝，是不是觉得外面卖的都不太合心意？\n\n很多人以为，想要喝到真正好喝又健康的咖啡，必须去咖啡馆花大钱买那些很贵的特调，或者自己在家买一堆复杂的器具来磨豆子。\n\n其实根本不用那么麻烦，真正懂喝的人，都在喝双鹤的CEO咖啡。\n\n第一步，了解一下这款加入灵芝的CEO咖啡。它喝起来很香醇，不会像普通即溶咖啡那样只有甜味，平时在家里或者办公室，随时泡一杯就很方便。\n\n第二步，找我免费注册成为会员。注册过程很简单，不需要花冤枉钱买一堆不需要的东西，还能直接了解怎么买到正品。\n\n第三步，如果你也喜欢这款咖啡，想要顺便多一份收入，我们可以聊聊怎么一起做这个咖啡计划。不管是马来西亚还是新加坡的朋友，我都会带你一步一步看怎么开始。\n\n以前很多人想找个好喝的咖啡牌子，结果要么买到味道不好的，要么不知道去哪里买正品。\n\n现在只要联系我，就能直接了解CEO咖啡，还能加入我们的111咖啡计划。\n\n如果你也想换一换平时喝的咖啡，或者想了解怎么一起做这个计划，现在就联系我，我们私信聊。", "tags": "herbalifemalaysia, herbalifesingapore, coachherbalifemalaysia, produkherbalife, herbalifekualalumpur", "bait": false, "type": "Video", "likes": 21, "comments": 0, "er": 0.0, "followers": 505390, "date": "2026-10-28", "url": "https://www.instagram.com/p/DfCy6FRTuyY/", "video": true, "ratio": 0, "score": 0.0, "status": "未处理", "x": 0.0}, {"id": "DeuMLdiz-Wq", "tracker": "Direct selling ceo coffee 竞对", "competitor": "coach_haslina.nasir", "caption": "Berminat untuk coaching  program + produk herbalife . Boleh hubungi saya 0173256869 atau tekan link  profile info . Saya bantu step by step cara mudah nak kurus cantik sihat \n\n#herbalifemalaysia #herbalifesingapore #coachherbalifemalaysia #produkherbalife #herbalifekualalumpur herbalifekedah herbalifekuantan", "transcript": "", "brk": "Hook类型: 痛点直击\n结构: 肥胖痛点 → 减肥渴望 → 转化引导\n为什么火: 精准切中渴望变美瘦身的群体，配合具体联系方式降低咨询门槛。\n改编角度: 结合自媒体成长痛点，用“小白如何低成本起号”切入，引导私信。", "my": "每天都在喝咖啡，你有没有想过换一个品牌喝？\n\n很多人以为，想在马来西亚和新加坡找一份多出来的收入，一定要辞掉现在的工作，或者花大把时间去重新学一门技术。\n\n其实根本不用这么麻烦，你每天都在喝咖啡，换一个选择就可以了。\n\n如果你也爱喝咖啡，又想找一个机会赚点零用钱，今天带你来看看我们怎么做的。\n\n第一步，了解我们的111咖啡计划。我们喝的是双鹤的CEO咖啡，里面带有灵芝，不仅好喝，还能让你在日常生活中分享给身边的朋友。\n\n第二步，注册成为免费会员。你不需要一开始就囤一大堆货，只要先注册，了解整个产品的特点，觉得适合自己再开始。\n\n第三步，跟着我们一起学习。我们会提供培训，教你平时怎么跟身边的咖啡爱好者交流，一步一步上手，不用担心自己不会做。\n\n以前很多人想多一份收入，却不知道从哪里开始，常常卡在不知道卖什么好，又怕投资太多资金。\n\n现在只要从你每天都在喝的咖啡开始，换一个品牌，把你的日常习惯变成一个机会。\n\n如果你也想了解这个111咖啡计划，现在就点击主页链接联系我，或者直接私信我，我们私底下聊聊怎么免费注册会员。", "tags": "herbalifemalaysia, herbalifesingapore, coachherbalifemalaysia, produkherbalife, herbalifekualalumpur", "bait": false, "type": "Video", "likes": 20, "comments": 0, "er": 0.0, "followers": 505390, "date": "2026-10-20", "url": "https://www.instagram.com/p/DeuMLdiz-Wq/", "video": true, "ratio": 0, "score": 0.0, "status": "未处理", "x": 0.0}, {"id": "DeZuHuVzLXQ", "tracker": "Direct selling ceo coffee 竞对", "competitor": "coach_haslina.nasir", "caption": "Program Kurus Online Bersama CH ni memang santai, sesuai untuk korang yang nak turun berat badan tanpa stress.\n\nDalam program ni, korang akan dapat:\n\n 1. Meal Plan Sihat – Menu seimbang dan mudah ikut, nutrition untuk boost result.\n 2. Workout Simple – Rutin senaman yang senang, boleh buat kat rumah je.\n 3. Coaching 1-on-1 – CH akan guide rapat2, monitor progress, dan bagi tips untuk stay on track.\n 4. Support Group – Korang takkan rasa sorang-sorang sebab ada geng dalam group yang sama-sama nak capai goal.\n5. Apps workout khas utk step by step follow up sistem sangat mudah utk beginner \n\nBestnya, program ni fleksibel, so boleh follow ikut masa dan keselesaan sendiri. Kalau ada apa-apa cabaran , CH sentiasa ada untuk bagi sokongan. Nak join, terus DM CH - CANTIK \n\nLet’s make this happen! 💪\n#herbalifemalaysia #kurus  #teampowerfitmalaysia  #herbalifeKualalumpur #coachherbalifemalaysia tipskurus programkurusmalaysia\n\nLink wasap\nhttps://joinprogramtpfm.wasap.my/", "transcript": "You should know I Hit the mono home and close Deeper than I ever know Who's not as like a rodeo Knows just how to take control When I'm horrible He is retaking to myself Conversation over I was feeling burning on Are you somebody who can go there?", "brk": "Hook类型: 痛点直击\n结构: 痛点引入 → 5大核心福利 → 行动号召\n为什么火: 精准直击想减肥又怕压力的大众心理，列举保姆级服务降低决策门槛。\n改编角度: 聚焦自媒体人痛点，推出“无压力涨粉+保姆级陪伴”的社群服务。", "my": "每天都在外面打工，真的一点自己的时间都没有吗？\n\n你可能觉得，想要在马来西亚和新加坡找一份兼职，或者换一个品牌的咖啡喝，一定要每天花几个小时去推销、去拉人、还要懂很多复杂的东西。\n\n其实真的不是这样。\n\n第一步，了解111咖啡计划。这是一款双鹤的CEO咖啡，里面带有健康的灵芝。你本身就是爱喝咖啡的人，换一个品牌喝，其实一点都不难。\n\n第二步，如果你想要赚钱，可以跟我一起做。你不需要辞掉现在的工作，只要利用你的日常时间，把平时喝咖啡的习惯分享出去就可以了。\n\n第三步，免费注册会员。注册之后，我们会有一对一的培训，告诉你具体怎么开始，不用担心自己什么都不会。\n\n以前你可能觉得，打工太累了，想要多一份收入却不知道可以做什么，每天卡在朝九晚五的生活里，看不到别的可能。\n\n现在，你只要换一杯咖啡喝，就能给自己一个开始赚钱的机会。\n\n如果你也想了解这个CEO咖啡，或者想知道怎么一起做，现在就私信我，我们来谈谈。", "tags": "herbalifemalaysia, kurus, teampowerfitmalaysia, herbalifeKualalumpur, coachherbalifemalaysia", "bait": false, "type": "Video", "likes": 21, "comments": 0, "er": 0.0, "followers": 505390, "date": "2026-10-12", "url": "https://www.instagram.com/p/DeZuHuVzLXQ/", "video": true, "ratio": 0, "score": 0.0, "status": "未处理", "x": 0.0}, {"id": "DeTrWs7Tct4", "tracker": "Direct selling ceo coffee 竞对", "competitor": "coach_haslina.nasir", "caption": "Ramai yang nak dapatkan produk Herbalife, tapi tak tahu nak beli dekat siapa. Bila cari di marketplace, ada pula keraguan tentang ketulenan produk dan siapa yang boleh bantu guide penggunaannya.\n\nSebab tu kami nak tambah lagi orang yang sama-sama berkongsi tentang nutrisi, menjaga pelanggan dan membina bisnes sebagai Independent Herbalife Distributor. 💚\n\nTak semestinya kena pandai semua baru boleh mula. Kita belajar step by step, dengan bimbingan dan team yang positif.\n\nAnda boleh kenali:\n✅ Produk dan keperluan pelanggan\n✅ Cara menjual serta memberi servis\n✅ Sistem sokongan dan latihan team\n✅ Pelan income  serta cara melayakkan diri mendapat pendapatan\n\nKami sedang membuka slot untuk anda yang nak tahu lebih lanjut tentang peluang bisnes ini.\n\nNak explore dulu? DM “BISNES”, saya share penerangannya. ✨ #herbalifemalaysia #coachherbalifemalaysia", "transcript": "", "brk": "Hook类型: 痛点直击\n结构: 指出现状盲区 → 抛出招募需求 → 消除新手顾虑 → 引导私信留资\n为什么火: 精准捕捉想做副业但迷茫的人群痛点，低门槛转化路径清晰\n改编角度: 结合自媒体变现痛点，推出新手陪跑计划并引导私信获取资料", "my": "每天想喝咖啡，但又不知道怎么开始？\n\n很多人以为，想换一个咖啡品牌喝，或者顺便找点事情做，一定要懂很多东西才可以。\n\n其实不是这样的，根本不用想得太复杂。\n\n第一，先了解产品。双鹤的CEO咖啡，是一杯健康带有灵芝的咖啡，很多人平时都在喝。\n\n第二，免费注册会员。你只需要联系我，我来帮你注册，不需要自己摸索。\n\n第三，跟着一起学。我们有提供培训，不管你是只想喝咖啡，还是想一起赚钱，都可以一步一步来。\n\n以前我也觉得，做这种事情很难，不知道怎么找人，也不知道怎么开口。\n\n现在只要有人问起，我就直接把双鹤的CEO咖啡分享给他们，顺便聊聊怎么一起做。\n\n如果你也想在马来西亚或新加坡喝咖啡顺便多一份收入，现在就联系我注册会员，我们私底下聊聊怎么开始。", "tags": "herbalifemalaysia, coachherbalifemalaysia", "bait": false, "type": "Video", "likes": 22, "comments": 0, "er": 0.0, "followers": 505390, "date": "2026-10-10", "url": "https://www.instagram.com/p/DeTrWs7Tct4/", "video": true, "ratio": 0, "score": 0.0, "status": "未处理", "x": 0.0}]</script>
+<script>
+const DATA = JSON.parse(document.getElementById('data').textContent);
+const SUPA = 'https://yhqvccldpjeghebikoxd.supabase.co';
+const ANON = 'sb_publishable_inNRZzXEPEByp8QJ8wizQg_V6INqDFc';
+document.getElementById('updated').textContent = '数据更新于 2026-11-13 11:44 (GMT+8)';
+
+const $ = id => document.getElementById(id);
+const I = n => '<svg class="ic"><use href="#i-' + n + '"/></svg>';
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt = n => n >= 1e6 ? (n/1e6).toFixed(1)+'M' : n >= 1e3 ? (n/1e3).toFixed(1)+'K' : String(n);
+const getKey = () => ANON;  // anon key is baked in — safe, can only change status
+const firstLine = c => ((c || '').split('\n').map(l => l.trim()).filter(Boolean)[0] || '(无文案)');
+const byRec = {}; DATA.forEach(d => byRec[d.id] = d);
+
+function toast(msg, ok) {
+  const t = $('toast'); t.textContent = msg; t.classList.add('show');
+  t.style.borderColor = ok ? 'var(--green)' : 'var(--red)';
+  clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('show'), 2600);
+}
+
+// ---- mission card ----
+function renderMission() {
+  const role = localStorage.getItem('tm_role') || '';
+  const name = localStorage.getItem('tm_name') || '';
+  const pend = DATA.filter(d => d.status === '未处理').length;
+  const hot = DATA.filter(d => d.status === '未处理' && (d.x || 0) >= 2).length;
+  const queue = DATA.filter(d => d.status === '拍摄中').length;
+  const done = DATA.filter(d => d.status === '已处理').length;
+  const m = $('mission');
+  if (role === 'Marketer') {
+    m.innerHTML = '<div class="mt">' + I('flame') + esc(name) + ',任务:从待挑选里选出值得拍的</div>'
+      + '<div class="md">待挑选 <b>' + pend + '</b> 条(其中真爆款 ×2+ 有 <b>' + hot + '</b> 条)'
+      + ' · 从下面清单直接选,或去雷达细看</div>';
+  } else if (role === 'Content Creator') {
+    m.innerHTML = '<div class="mt">' + I('video') + esc(name) + ',任务:清空拍摄中队列</div>'
+      + '<div class="md">队列还有 <b>' + queue + '</b> 条待做 · 已完成共 <b>' + done + '</b> 条</div>';
+  } else {
+    m.innerHTML = '<div class="mt">' + I('flame') + '团队概览</div>'
+      + '<div class="md">待挑选 <b>' + pend + '</b> 条 · 拍摄中 <b>' + queue + '</b> 条 · 已完成 <b>' + done + '</b> 条</div>';
+  }
+}
+
+function orderSections() {
+  // Marketer sees picks first; Creator sees shooting queue first
+  if ((localStorage.getItem('tm_role') || '') === 'Marketer') {
+    $('secShoot').parentNode.insertBefore($('secPick'), $('secShoot'));
+  } else {
+    $('secPick').parentNode.insertBefore($('secShoot'), $('secPick'));
+  }
+}
+
+// ---- identity ----
+function meLabel() {
+  const n = localStorage.getItem('tm_name'), r = localStorage.getItem('tm_role');
+  $('meLabel').innerHTML = n ? '<b>' + esc(n) + '</b>&nbsp;· ' + esc(r || '') : '未登记';
+}
+function showOverlay() {
+  $('oName').value = localStorage.getItem('tm_name') || '';
+  $('oRole').value = localStorage.getItem('tm_role') || 'Marketer';
+  $('overlay').classList.add('show');
+}
+$('oSave').onclick = () => {
+  const n = $('oName').value.trim();
+  if (!n) { $('oName').focus(); return; }
+  localStorage.setItem('tm_name', n);
+  localStorage.setItem('tm_role', $('oRole').value);
+  $('overlay').classList.remove('show');
+  meLabel(); orderSections(); renderMission();
+  refreshStatuses();
+};
+$('meBtn').onclick = showOverlay;
+meLabel();
+if (!localStorage.getItem('tm_name')) showOverlay();
+
+// ---- tabs ----
+document.querySelectorAll('.ntab').forEach(t => t.onclick = () => {
+  document.querySelectorAll('.ntab').forEach(x => x.classList.toggle('on', x === t));
+  document.querySelectorAll('.page').forEach(p => p.classList.toggle('on', p.id === 'p-' + t.dataset.p));
+  if (t.dataset.p === 'radar' && !$('radarWrap').querySelector('iframe')) {
+    const f = document.createElement('iframe'); f.src = 'index.html'; $('radarWrap').appendChild(f);
+  }
+});
+
+// ---- status write ----
+async function setStatus(d, val) {
+  try {
+    const r = await fetch(SUPA + '/rest/v1/posts?post_id=eq.' + encodeURIComponent(d.id), {
+      method: 'PATCH',
+      headers: { 'apikey': ANON, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+      body: JSON.stringify({ status: val })
+    });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    d.status = val;
+    cacheStatus(d.id, val);
+    toast('✓ @' + d.competitor + ' → ' + val, true);
+  } catch (e) {
+    toast('失败: ' + e.message, false);
+  }
+  renderWork();
+}
+
+// ---- 今日工作 ----
+function pillBtn(cls, icon, label) {
+  return '<button class="pill ' + cls + '">' + I(icon) + label + '</button>';
+}
+
+function renderWork() {
+  const pend = DATA.filter(d => d.status === '未处理');
+  const shoot = DATA.filter(d => d.status === '拍摄中');
+  const done = DATA.filter(d => d.status === '已处理');
+  $('stPending').textContent = pend.length;
+  $('stShoot').textContent = shoot.length;
+  $('stDone').textContent = done.length;
+
+  // shooting queue
+  const sl = $('shootList'); sl.innerHTML = '';
+  if (!shoot.length) sl.innerHTML = '<div class="none">队列是空的 — Marketer 去爆款雷达挑几条拖进「拍摄中」</div>';
+  shoot.forEach(d => {
+    const r = document.createElement('div'); r.className = 'row';
+    r.innerHTML = '<a class="who2" href="https://www.instagram.com/' + d.competitor + '/" target="_blank">@' + esc(d.competitor) + '</a>'
+      + ((d.x || 0) >= 2 ? '<span class="xb">×' + d.x + '</span>' : '')
+      + '<span class="hookline">' + esc(firstLine(d.caption)) + '</span>'
+      + '<a class="pill" href="' + d.url + '" target="_blank">' + I('ext') + '原帖</a>'
+      + pillBtn('ok', 'check', '完成') + pillBtn('bad', 'x', '退回');
+    const btns = r.querySelectorAll('button');
+    btns[0].onclick = () => setStatus(d, '已处理');
+    btns[1].onclick = () => setStatus(d, '未处理');
+    sl.appendChild(r);
+  });
+
+  // picks
+  const picks = pend.filter(d => (d.x || 0) >= 2).sort((a, b) => (b.x || 0) - (a.x || 0)).slice(0, 8);
+  const pl = $('pickList'); pl.innerHTML = '';
+  if (!picks.length) pl.innerHTML = '<div class="none">暂时没有 ×2 以上的未处理爆款 — 等周一自动抓新数据</div>';
+  picks.forEach(d => {
+    const r = document.createElement('div'); r.className = 'row';
+    r.innerHTML = '<span class="xb">×' + d.x + '</span>'
+      + '<a class="who2" href="https://www.instagram.com/' + d.competitor + '/" target="_blank">@' + esc(d.competitor) + '</a>'
+      + '<span class="hookline">' + esc(firstLine(d.caption))
+      + '<small>🔥' + d.score + ' · ER ' + d.er + '% · 💬' + fmt(d.comments) + '</small></span>'
+      + '<a class="pill" href="' + d.url + '" target="_blank">' + I('ext') + '原帖</a>'
+      + pillBtn('ok', 'video', '选中拍摄') + pillBtn('bad', 'x', '跳过');
+    const btns = r.querySelectorAll('button');
+    btns[0].onclick = () => setStatus(d, '拍摄中');
+    btns[1].onclick = () => setStatus(d, '跳过');
+    pl.appendChild(r);
+  });
+  renderMission();
+}
+
+function applyStatusCache() {
+  try {
+    const c = JSON.parse(localStorage.getItem('st_cache') || '{}');
+    Object.keys(c).forEach(rid => { const d = byRec[rid]; if (d) d.status = c[rid]; });
+  } catch (e) {}
+}
+
+function cacheStatus(rid, val) {
+  try {
+    const c = JSON.parse(localStorage.getItem('st_cache') || '{}');
+    c[rid] = val; localStorage.setItem('st_cache', JSON.stringify(c));
+  } catch (e) {}
+}
+
+// ---- live statuses from Supabase ----
+async function refreshStatuses() {
+  applyStatusCache(); renderWork();  // last-known statuses first
+  if (Date.now() - (+localStorage.getItem('st_ts') || 0) < 600000) return;  // 10-min throttle
+  localStorage.setItem('st_ts', String(Date.now()));
+  const fresh = {};
+  try {
+    const r = await fetch(SUPA + '/rest/v1/posts?select=post_id,status', { headers: { 'apikey': ANON } });
+    if (!r.ok) return;
+    (await r.json()).forEach(row => {
+      const d = byRec[row.post_id];
+      if (d) d.status = row.status || '未处理';
+      if (row.status && row.status !== '未处理') fresh[row.post_id] = row.status;
+    });
+    localStorage.setItem('st_cache', JSON.stringify(fresh));
+    renderWork();
+  } catch (e) {}
+}
+
+orderSections();
+renderMission();
+renderWork();
+refreshStatuses();
+</script>
+</body>
+</html>
